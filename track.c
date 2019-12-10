@@ -32,6 +32,7 @@
 #include "rig.h"
 #include "status.h"
 #include "track.h"
+#include "osc.h"
 
 #define RATE 44100
 
@@ -447,6 +448,8 @@ static void stop_import(struct track *t)
 
     if (WIFEXITED(status) && WEXITSTATUS(status) == EXIT_SUCCESS) {
         fprintf(stderr, "Track import completed\n");
+        osc_send_ppm_block(t);
+        fprintf(stderr, "Sent ppm to OSC\n");
     } else {
         fprintf(stderr, "Track import completed with status %d\n", status);
         if (!t->terminated)

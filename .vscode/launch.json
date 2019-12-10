@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+    {
+        "name": "Remote Debug",
+        "type": "gdb",
+        "request": "launch",
+        "target": "xwax",
+        "arguments": "-m 32 -t serato_2a -r 48000 -a hw:0 -i import -s scan -l /media/pi/MIR_02/Contents",
+        "cwd": "${workspaceRoot}",
+        "valuesFormatting": "parseText"
+    },
+    {
+        "name": "Debug",
+        "type": "gdb",
+        "request": "launch",
+        "target": "${workspaceRoot}/xwax",
+        "arguments": "-m 32 -r 48000 -a hw:0 -l /media/pi/MIR_02/Contents",
+        "cwd": "${workspaceRoot}",
+        "valuesFormatting": "parseText"
+    }
+    ]
+}

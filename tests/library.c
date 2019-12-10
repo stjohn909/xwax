@@ -24,6 +24,7 @@
 #include "rig.h"
 #include "thread.h"
 
+
 void handle(int signum)
 {
     rig_quit();
