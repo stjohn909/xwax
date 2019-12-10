@@ -311,7 +311,7 @@ int library_handler(const char *path, const char *types, lo_arg ** argv,
 
 
     int n;
-    for (n = 0; n < osc_library->storage.by_artist.entries; n++) {
+    for (n = 0; n < osc_library->storage.by_artist.entries; ++n) {
         
         re = osc_library->storage.by_artist.record[n];
         printf("Artist: %s --- Title: %s\n", re->artist, re->title);
@@ -328,16 +328,15 @@ int library_handler(const char *path, const char *types, lo_arg ** argv,
 int load_track_handler(const char *path, const char *types, lo_arg ** argv,
                 int argc, void *data, void *user_data)
 {
+
+
     /* example showing pulling the argument values out of the argv array */
     printf("%s <- deck:%i path:%s artist:%s title:%s\n", path, argv[0]->i, &argv[1]->s, &argv[2]->s, &argv[3]->s);
     fflush(stdout);
     
     int d;
     struct deck *de;
-    struct record *r;    
-    
-    d = argv[0]->i;
-    de = &osc_deck[d];
+    struct record *r; 
 
     r = malloc(sizeof *r);
     if (r == NULL) {
@@ -348,16 +347,15 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
     r->pathname = strdup(&argv[1]->s);
     r->artist = strdup(&argv[2]->s);
     r->title = strdup(&argv[3]->s);  
-
-    r = library_add(osc_library, r);
+ 
     if (r == NULL) {
         /* FIXME: memory leak, need to do record_clear(r) */
         return -1;
     }
-
+   
     deck_load(&osc_deck[d], r);
-
-
+    
+    
     return 0;
 }
 
