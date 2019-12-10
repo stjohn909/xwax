@@ -6,6 +6,8 @@ mktimecode
 .config
 .version
 dist
+.vscode
+.vscode/*
 
 tests/cues
 tests/external
