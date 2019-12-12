@@ -46,7 +46,8 @@ class MyServer(ServerThread):
         print("Calling library...")
         i = 1
         server.allTheTracks.clear()
-        send(target, "/xwax/library", i)
+        send(target, "/xwax/all_records", i)
+        print("Sent call to library...")
 
     @make_method('/iphone/trackname', 's')
     def iphone_update_label(self, path, args):

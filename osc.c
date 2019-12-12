@@ -61,7 +61,6 @@ lo_address address[2];
 int osc_nconnection = 0;
 int osc_nclient = 0;
 
-
 /*
  * Start osc server and add methods
  */
@@ -93,6 +92,12 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
 
     lo_server_thread_add_method(st, "/xwax/quit", "", quit_handler, NULL);
 
+    lo_server_thread_add_method(st, "/xwax/all_records", "i", all_records_handler, NULL);
+
+    lo_server_thread_add_method(st, "/xwax/pitch", "if", pitch_handler, NULL);
+
+    lo_server_thread_add_method(st, "/xwax/position", "if", position_handler, NULL);
+    
     lo_server_thread_start(st);
 
     return 0;
@@ -136,6 +141,60 @@ int generic_handler(const char *path, const char *types, lo_arg ** argv,
     fflush(stderr);
 
     return 1;
+}
+
+int osc_send_record(lo_address a, int r)
+{
+    struct record *rx;
+    printf("record number: %i", r);
+
+    rx = malloc(sizeof *rx);
+    if (rx== NULL) {
+        perror("malloc");
+        return -1;
+    }
+    rx = osc_library->storage.by_artist.record[r];
+
+    lo_send(a, "/client/get_record", "isssd", r, rx->pathname, rx->artist, rx->title, rx->bpm);
+}
+
+int all_records_handler(const char *path, const char *types, lo_arg ** argv,
+                int argc, void *data, void *user_data)
+{
+    
+    /* example showing pulling the argument values out of the argv array */
+    //printf("Library: %i <- i:%i\n", path, argv[1]->i);
+
+    int numRecords;
+    numRecords = osc_library->storage.by_artist.entries;
+    printf("Number of records; %i ", numRecords);
+    struct record *re;
+
+    re = malloc(sizeof *re);
+    if (re== NULL) {
+        perror("malloc");
+        return -1;
+    }
+
+    lo_address a = lo_message_get_source(data);
+    
+    char* url = lo_address_get_url(a);
+
+
+    int n;
+    for (n = 0; n < osc_library->storage.by_artist.entries; n++) {
+        
+        re = osc_library->storage.by_artist.record[n];
+        printf("Artist: %s --- Title: %s\n", re->artist, re->title);
+
+        osc_send_record(a, n);  //send the record back to the caller
+        //fflush(stdout);
+    }
+    printf("\n");
+ 
+    //printf("Got the crate: %s\n", cr->name);
+    fflush(stdout);
+    return 0;
 }
 
 /*
@@ -439,6 +498,40 @@ int recue_handler(const char *path, const char *types, lo_arg ** argv,
 
     deck_recue(de);
 
+    return 0;
+}
+
+int pitch_handler(const char *path, const char *types, lo_arg ** argv,
+                int argc, void *data, void *user_data)
+{
+    /* example showing pulling the argument values out of the argv array */
+    printf("%s <- f:%f\n", path, argv[1]->f);
+    fflush(stdout);
+    
+    struct deck *de;
+    struct player *pl;
+    de = &osc_deck[argv[0]->i];
+    pl = &de->player;
+    
+    player_set_pitch(pl, argv[1]->f);
+
+    return 0;
+}
+
+int position_handler(const char *path, const char *types, lo_arg ** argv,
+                int argc, void *data, void *user_data)
+{
+    /* example showing pulling the argument values out of the argv array */
+    //printf("%s\n", path);
+    //fflush(stdout);
+    
+    struct deck *de;
+    struct player *pl;
+    de = &osc_deck[argv[0]->i];
+    pl = &de->player;
+    
+    player_seek_to(pl, argv[1]->f);
+    
     return 0;
 }
 

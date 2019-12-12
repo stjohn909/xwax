@@ -52,6 +52,15 @@ int reconnect_handler(const char *path, const char *types, lo_arg ** argv,
 int quit_handler(const char *path, const char *types, lo_arg ** argv,
                 int argc, void *data, void *user_data);
 
+int all_records_handler(const char *path, const char *types, lo_arg ** argv,
+                int argc, void *data, void *user_data);
+
+int pitch_handler(const char *path, const char *types, lo_arg ** argv,
+                int argc, void *data, void *user_data);
+
+int position_handler(const char *path, const char *types, lo_arg ** argv,
+                int argc, void *data, void *user_data);
+
 int osc_start(struct deck *deck, struct library *library, size_t ndeck);
 void osc_stop();
 

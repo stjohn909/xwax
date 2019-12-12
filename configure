@@ -29,6 +29,7 @@ Options:
   --enable-alsa    Enable ALSA audio device
   --enable-jack    Enable JACK audio device
   --enable-oss     Enable OSS audio device
+  --enable-osc	   Enable OSC messaging
   --debug          Debug build
   --profile        Profile build
 EOF
@@ -57,6 +58,9 @@ while [ $# -ge 1 ]; do
 		;;
 	--enable-oss)
 		OSS=true
+		;;
+	--enable-osc)
+		OSC=true
 		;;
 	--prefix)
 		if [ -z "$2" ]; then
@@ -103,6 +107,13 @@ fi
 if $OSS; then
 	echo "OSS enabled"
 	echo "OSS = yes" >> $OUTPUT
+else
+	echo "OSS disabled"
+fi
+
+if $OSC; then
+	echo "OSC enabled"
+	echo "OSC = yes" >> $OUTPUT
 else
 	echo "OSS disabled"
 fi

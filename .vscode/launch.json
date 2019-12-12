@@ -12,15 +12,6 @@
         "arguments": "-m 32 -t serato_2a -a hw:0 -i import -s scan -l /media/pi/MIR_02/Contents",
         "cwd": "${workspaceRoot}",
         "valuesFormatting": "parseText"
-    },
-    {
-        "name": "Debug",
-        "type": "gdb",
-        "request": "launch",
-        "target": "${workspaceRoot}/xwax",
-        "arguments": "-m -a hw:0 -l /media/pi/MIR_02/Contents",
-        "cwd": "${workspaceRoot}",
-        "valuesFormatting": "parseText"
     }
     ]
 }

@@ -240,6 +240,12 @@ void player_set_timecode_control(struct player *pl, bool on)
     pl->timecode_control = on;
 }
 
+void player_set_pitch(struct player *pl, const float pitch)
+{
+    pl->timecode_control = false;
+    pl->pitch = pitch;
+}
+
 /*
  * Toggle timecode control
  *
