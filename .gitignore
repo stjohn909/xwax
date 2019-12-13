@@ -5,6 +5,7 @@ mktimecode
 *.d
 .config
 .version
+.DS_Store
 dist
 
 tests/status
