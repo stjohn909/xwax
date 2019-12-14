@@ -9,7 +9,16 @@
         "type": "gdb",
         "request": "launch",
         "target": "xwax",
-        "arguments": "-m 32 -t serato_2a -a hw:0 -i import -s scan -l /media/pi/MIR_02/Contents",
+        "arguments": "--osc -m 32 -t serato_2a -a hw:0 -i import -s scan -l /media/pi/MIR_02/Contents",
+        "cwd": "${workspaceRoot}",
+        "valuesFormatting": "parseText"
+    },
+    {
+        "name": "Remote Debug Dummy",
+        "type": "gdb",
+        "request": "launch",
+        "target": "xwax",
+        "arguments": "--osc --dummy --dummy -i import -s scan -l /media/pi/MIR_02/Contents",
         "cwd": "${workspaceRoot}",
         "valuesFormatting": "parseText"
     }
