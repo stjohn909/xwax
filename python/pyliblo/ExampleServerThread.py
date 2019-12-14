@@ -22,21 +22,26 @@ class MyServer(ServerThread):
         ServerThread.__init__(self, 1234)
 
     @make_method('/iphone/trackload', 'i')
-    def xwax_pitch_callback(self, path, args):
-        deck = 0
+    def xwax_track_load_callback(self, path, args):
+        for arg in args:
+            print(arg)
+        
+        deck = args[0] - 1
         tp = server.allTheTracks[server.curTrackNum][1]
         ta = server.allTheTracks[server.curTrackNum][2]
         tt = server.allTheTracks[server.curTrackNum][3]
-        args = [deck, tp, ta, tt]
-        send(target, "/xwax/load_track", 0, tp, ta, tt)
+        tb = server.allTheTracks[server.curTrackNum][4]
+        args = [deck, tp, ta, tt, tb]
+        send(target, "/xwax/load_track", deck, tp, ta, tt, tb)
     
-    @make_method('/client/get_record', 'isss')
+    @make_method('/client/get_record', 'isssd')
     def xwax_get_record_callback(self, path, args):
         num = args[0]
-        pathname = args[3]
+        pathname = args[1]
         artist = args[2]
-        title = args[1]
-        entry  = [num, pathname, artist, title]
+        title = args[3]
+        bpm = args[4]
+        entry  = [num, pathname, artist, title, bpm]
         
         server.allTheTracks.append(entry)
         print("Record: ", entry)
@@ -65,7 +70,7 @@ class MyServer(ServerThread):
         if (server.curTrackNum > len(server.allTheTracks)-1):
             server.curTrackNum = 0
 
-        s = server.allTheTracks[server.curTrackNum][2]
+        s = server.allTheTracks[server.curTrackNum][3]
         print(server.curTrackNum)
         send(controlTarget, '/iphone/trackname', s)
 
