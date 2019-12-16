@@ -73,7 +73,7 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
 
     /* why do we have two addresses here? They're both the same! */
     address[0] = lo_address_new_from_url("osc.udp://0.0.0.0:7771/");
-    address[1] = lo_address_new_from_url("osc.udp://0.0.0.0:7771/");
+    address[1] = lo_address_new_from_url("osc.udp://0.0.0.0:7772/");
 
     /* start a new server on port 7770 */
     st = lo_server_thread_new("7770", error);
