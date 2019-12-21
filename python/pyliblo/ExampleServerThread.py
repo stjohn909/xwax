@@ -6,7 +6,7 @@ from itertools import cycle
 
 
 try:
-    target = Address("10.0.1.14",7770)
+    target = Address("10.0.1.14",8887)
     controlTarget = Address("10.0.1.2",4321)
 
     print("xwax url: %s", target.get_url())
@@ -20,6 +20,7 @@ class MyServer(ServerThread):
     curTrackNum = 9
     def __init__(self):
         ServerThread.__init__(self, 1234)
+
 
     @make_method('/iphone/trackload', 'i')
     def xwax_track_load_callback(self, path, args):
@@ -74,6 +75,12 @@ class MyServer(ServerThread):
         print(server.curTrackNum)
         send(controlTarget, '/iphone/trackname', s)
 
+    @make_method('/ue4_client/ue4_testmessage', 's')
+    def ue4_testmessage(self,path,args):
+        print("received from UE4: '%s' " % args[0] )
+
+        ue4Target = Address("10.0.1.6", 9999)
+        send(ue4Target, '/us4_client/testreply')
 
 
     @make_method(None, None)
@@ -81,6 +88,7 @@ class MyServer(ServerThread):
         print("received unknown message '%s'" % path)
 
 
+        
 
 try:
     server = MyServer()

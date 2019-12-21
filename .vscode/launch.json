@@ -8,7 +8,7 @@
 
     {
         "name": "Remote Debug",
-        "env": {"DISPLAY": "raspberrypi:10.0"},
+        "env": {"DISPLAY": "raspberrypi:12.0"},
         "type": "gdb",
         "request": "launch",
         "target": "./xwax",
@@ -20,7 +20,7 @@
         "name": "Remote Debug Dummy",
         "type": "gdb",
         "request": "launch",
-        "env": {"DISPLAY": "raspberrypi:10.0"},
+        "env": {"DISPLAY": "raspberrypi:11.0"},
         "target": "xwax",
         "arguments": "--osc --dummy --dummy -i import -s scan -l /media/pi/MIR_02/Contents",
         "cwd": "${workspaceRoot}",

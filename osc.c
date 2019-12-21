@@ -72,13 +72,15 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
     osc_ndeck = ndeck;
 
     /* why do we have two addresses here? They're both the same! */
-    address[0] = lo_address_new_from_url("osc.udp://0.0.0.0:7771/");
+    address[0] = lo_address_new_from_url("osc.udp://0.0.0.0:9999/");
     address[1] = lo_address_new_from_url("osc.udp://0.0.0.0:7772/");
 
     /* start a new server on port 7770 */
-    st = lo_server_thread_new("7770", error);
+    st = lo_server_thread_new("8887", error);
 
     lo_server_thread_add_method(st, "/xwax/load_track", "isssd", load_track_handler, NULL);
+
+    lo_server_thread_add_method(st, "/xwax/ue4_testmessage", "i", ue4_testmessage_handler, NULL);
 
     lo_server_thread_add_method(st, "/xwax/get_status", "i", get_status_handler, NULL);
 
@@ -104,7 +106,7 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
 }
 
 /*
- * Stop all osc services
+ * Stop all osc services8887
  */
 void osc_stop()
 {
@@ -143,6 +145,23 @@ int generic_handler(const char *path, const char *types, lo_arg ** argv,
     return 1;
 }
 
+int ue4_testmessage_handler(const char *path, const char *types, lo_arg ** argv,
+                    int argc, void *data, void *user_data)
+{
+    //int i;
+    printf("Test Message called...");
+    return 0;
+    lo_address a = lo_address_new("10.0.1.6",9999);
+    osc_send_ue4_testmessage_echo(a);
+}
+
+int osc_send_ue4_testmessage_echo(lo_address a)
+{
+     printf("Address: %s\n", a);
+    lo_send(a, "/ue4_client/testmessage", "s", "This is a Test message from Xwax!"); 
+    return 0;
+}
+
 int osc_send_record(lo_address a, int r)
 {
     struct record *rx;
@@ -156,6 +175,7 @@ int osc_send_record(lo_address a, int r)
     rx = osc_library->storage.by_artist.record[r];
 
     lo_send(a, "/client/get_record", "isssd", r, rx->pathname, rx->artist, rx->title, rx->bpm);
+    return 0;
 }
 
 int all_records_handler(const char *path, const char *types, lo_arg ** argv,
@@ -179,7 +199,7 @@ int all_records_handler(const char *path, const char *types, lo_arg ** argv,
     lo_address a = lo_message_get_source(data);
     
     char* url = lo_address_get_url(a);
-
+    printf("url: %s", url);
 
     int n;
     for (n = 0; n < osc_library->storage.by_artist.entries; n++) {
@@ -289,7 +309,8 @@ int get_status_handler(const char *path, const char *types, lo_arg ** argv,
     }
 
     // lo_address a = lo_message_get_source(data);
-    lo_address a = lo_address_new("0.0.0.0", "7771");
+    // lo_address a = lo_address_new("0.0.0.0", "7771");
+    lo_address a = address[0];
     printf("PORT: %s\n", lo_address_get_port(a));
 
     char* url = lo_address_get_url(a);
@@ -322,7 +343,8 @@ int get_monitor_handler(const char *path, const char *types, lo_arg ** argv,
     }
 
     // lo_address a = lo_message_get_source(data);
-    lo_address a = lo_address_new("0.0.0.0", "7771");
+     lo_address a = lo_address_new("0.0.0.0", "8888");
+    //lo_address a = address[0];
     printf("PORT: %s\n", lo_address_get_port(a));
 
     char* url = lo_address_get_url(a);
