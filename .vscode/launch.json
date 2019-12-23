@@ -8,11 +8,11 @@
 
     {
         "name": "Remote Debug",
-        "env": {"DISPLAY": "raspberrypi:12.0"},
+        "env": {"DISPLAY": "raspberrypi:10.0"},
         "type": "gdb",
         "request": "launch",
         "target": "./xwax",
-        "arguments": "--osc -m 32 -t serato_2a -a hw:0 -r 48000 -i import -s scan -l /media/pi/MIR_02/Contents",
+        "arguments": "--osc --headless -t serato_2a -m 32 -a hw:0 -r 48000 -i import -s scan -l /media/pi/MIR_02/Contents",
         "cwd": "${workspaceRoot}",
         "valuesFormatting": "parseText"
     },
@@ -20,7 +20,7 @@
         "name": "Remote Debug Dummy",
         "type": "gdb",
         "request": "launch",
-        "env": {"DISPLAY": "raspberrypi:11.0"},
+        "env": {"DISPLAY": "raspberrypi:10.0"},
         "target": "xwax",
         "arguments": "--osc --dummy --dummy -i import -s scan -l /media/pi/MIR_02/Contents",
         "cwd": "${workspaceRoot}",

@@ -8,6 +8,7 @@ from itertools import cycle
 try:
     target = Address("10.0.1.14",8887)
     controlTarget = Address("10.0.1.2",4321)
+    ue4Target = Address("10.0.1.6", 9999)
 
     print("xwax url: %s", target.get_url())
     print("controller url: %s", controlTarget.get_url())

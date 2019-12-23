@@ -71,16 +71,14 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
     osc_library = library;
     osc_ndeck = ndeck;
 
-    /* why do we have two addresses here? They're both the same! */
-    address[0] = lo_address_new_from_url("osc.udp://0.0.0.0:9999/");
-    address[1] = lo_address_new_from_url("osc.udp://0.0.0.0:7772/");
+    address[0] = lo_address_new_from_url("osc.udp://10.0.1.6:9999/"); //ue4 osc server
 
     /* start a new server on port 7770 */
     st = lo_server_thread_new("8887", error);
 
     lo_server_thread_add_method(st, "/xwax/load_track", "isssd", load_track_handler, NULL);
 
-    lo_server_thread_add_method(st, "/xwax/ue4_testmessage", "i", ue4_testmessage_handler, NULL);
+    lo_server_thread_add_method(st, "/xwax/ue4_testmessage", "s", ue4_testmessage_handler, NULL);
 
     lo_server_thread_add_method(st, "/xwax/get_status", "i", get_status_handler, NULL);
 
@@ -106,7 +104,7 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
 }
 
 /*
- * Stop all osc services8887
+ * Stop all osc services
  */
 void osc_stop()
 {
@@ -148,24 +146,32 @@ int generic_handler(const char *path, const char *types, lo_arg ** argv,
 int ue4_testmessage_handler(const char *path, const char *types, lo_arg ** argv,
                     int argc, void *data, void *user_data)
 {
+    
     //int i;
-    printf("Test Message called...");
+    printf("Test Message called...\n");
+    
+    lo_address a = lo_message_get_source(data);
+    char* url = lo_address_get_url(a);
+
+    printf("%s\n", argv[0]);
+    
+    osc_send_ue4_testmessage_echo(address[0]);
     return 0;
-    lo_address a = lo_address_new("10.0.1.6",9999);
-    osc_send_ue4_testmessage_echo(a);
+
 }
 
 int osc_send_ue4_testmessage_echo(lo_address a)
 {
-     printf("Address: %s\n", a);
-    lo_send(a, "/ue4_client/testmessage", "s", "This is a Test message from Xwax!"); 
+    printf("Send message called... \n");
+
+    lo_send(a, "/ue4_client/ue4_testmessage", "s", "This is a Test message from Xwax!"); 
+
     return 0;
 }
 
 int osc_send_record(lo_address a, int r)
 {
     struct record *rx;
-    printf("record number: %i", r);
 
     rx = malloc(sizeof *rx);
     if (rx== NULL) {
@@ -174,17 +180,13 @@ int osc_send_record(lo_address a, int r)
     }
     rx = osc_library->storage.by_artist.record[r];
 
-    lo_send(a, "/client/get_record", "isssd", r, rx->pathname, rx->artist, rx->title, rx->bpm);
+    lo_send(a, "/ue4_client/get_record", "isssd", r, rx->pathname, rx->artist, rx->title, rx->bpm);
     return 0;
 }
 
 int all_records_handler(const char *path, const char *types, lo_arg ** argv,
                 int argc, void *data, void *user_data)
 {
-    
-    /* example showing pulling the argument values out of the argv array */
-    //printf("Library: %i <- i:%i\n", path, argv[1]->i);
-
     int numRecords;
     numRecords = osc_library->storage.by_artist.entries;
     printf("Number of records; %i ", numRecords);
@@ -196,14 +198,12 @@ int all_records_handler(const char *path, const char *types, lo_arg ** argv,
         return -1;
     }
 
-    lo_address a = lo_message_get_source(data);
+    lo_address a = address[0];
     
-    char* url = lo_address_get_url(a);
-    printf("url: %s", url);
 
     int n;
     for (n = 0; n < osc_library->storage.by_artist.entries; n++) {
-        
+        printf("record number: %i -- ", n);
         re = osc_library->storage.by_artist.record[n];
         printf("Artist: %s --- Title: %s\n", re->artist, re->title);
 
@@ -214,6 +214,7 @@ int all_records_handler(const char *path, const char *types, lo_arg ** argv,
  
     //printf("Got the crate: %s\n", cr->name);
     fflush(stdout);
+    free(re);
     return 0;
 }
 
