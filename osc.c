@@ -214,7 +214,7 @@ int all_records_handler(const char *path, const char *types, lo_arg ** argv,
  
     //printf("Got the crate: %s\n", cr->name);
     fflush(stdout);
-    free(re);
+    
     return 0;
 }
 
