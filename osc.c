@@ -71,12 +71,12 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
     osc_library = library;
     osc_ndeck = ndeck;
 
-    address[0] = lo_address_new_from_url("osc.udp://10.0.1.6:9999/"); //ue4 osc server
+    address[0] = lo_address_new_from_url("osc.udp://10.0.1.51:9999/"); //ue4 osc server
 
     /* start a new server on port 7770 */
     st = lo_server_thread_new("8887", error);
 
-    lo_server_thread_add_method(st, "/xwax/load_track", "isssd", load_track_handler, NULL);
+    lo_server_thread_add_method(st, "/xwax/load_track", "is", load_track_handler, NULL); //UE4 doesn't natively support double types.
 
     lo_server_thread_add_method(st, "/xwax/ue4_testmessage", "s", ue4_testmessage_handler, NULL);
 
@@ -208,7 +208,8 @@ int all_records_handler(const char *path, const char *types, lo_arg ** argv,
         printf("Artist: %s --- Title: %s\n", re->artist, re->title);
 
         osc_send_record(a, n);  //send the record back to the caller
-        //fflush(stdout);
+        fflush(stdout);
+        usleep(10);
     }
     printf("\n");
  
@@ -226,9 +227,10 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
                 int argc, void *data, void *user_data)
 {
     /* example showing pulling the argument values out of the argv array */
-    fprintf(stderr, "%s <- deck:%i path:%s artist:%s title:%s bpm:%g\n",
-            path, argv[0]->i, &argv[1]->s, &argv[2]->s, &argv[3]->s, argv[4]->d);
-    fflush(stderr);
+    //fprintf(stderr, "%s <- deck:%i path:%s artist:%s title:%s\n",
+    //        path, argv[0]->i, &argv[1]->s, &argv[2]->s, &argv[3]->s);
+    
+    //fflush(stderr);
 
     int d, i;
     struct deck *de;
@@ -245,29 +247,8 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
     }
     de = &osc_deck[d];
 
-	/*
-    r = malloc(sizeof *r);
-    if (r == NULL) {
-        perror("malloc");
-        return -1;
-    }
-
-	// One could try to find the record by pathname and only load if it already exists library->storage->by_artist->record->pathname
-	// Loading the entire library doesn't take long and this would fix the obvious memory leak
-	// BUT: the problem typically seems to come up when trying to access a "track" rather than a "record"
-	// track contains more audio like information
-    r->pathname = strdup(&argv[1]->s);
-    r->artist = strdup(&argv[2]->s);
-    r->title = strdup(&argv[3]->s);
-    r->bpm = (double) argv[4]->d;
-
-    r = library_add(osc_library, r);
-    if (r == NULL) {
-        // FIXME: memory leak, need to do record_clear(r)
-        return -1;
-    }
-	*/
-
+    //turns out you don't need the bpm double float to load tracks.  But there will be conversion between 
+    //xwax track struct and ue4 track struct: ue4 doesn't natively support doubles in blueprints.
 
 	storage = osc_library->storage;
 	for (i=0; i<storage.by_artist.entries; i++) {
@@ -286,7 +267,6 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
 	} else {
 		fprintf(stderr, "Error loading path %s", pathname);
 	}
-
 
     return 0;
 }
