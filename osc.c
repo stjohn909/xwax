@@ -97,6 +97,8 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
     lo_server_thread_add_method(st, "/xwax/pitch", "if", pitch_handler, NULL);
 
     lo_server_thread_add_method(st, "/xwax/position", "if", position_handler, NULL);
+
+    lo_server_thread_add_method(st, "/xwax/playback", "i", playback_handler, NULL);
     
     lo_server_thread_start(st);
 
@@ -141,6 +143,31 @@ int generic_handler(const char *path, const char *types, lo_arg ** argv,
     fflush(stderr);
 
     return 1;
+}
+
+int playback_handler(const char *path, const char *types, lo_arg ** argv,
+                    int argc, void *data, void *user_data)
+{
+    
+    printf("Deck playback");
+    int d, i;
+    struct deck *de;
+    struct player *pl;
+
+    d = argv[0]->i;
+    d = 0;
+    if (d >= osc_ndeck) {
+        fprintf(stderr, "Trying to access deck %d\n  osc_ndeck = %d\n", d, osc_ndeck);
+        error(255, path, "Trying to access into invalid deck");
+        return 255;
+    }
+    de = &osc_deck[d];
+    pl = &de->player;
+
+    player_set_internal_playback(pl);
+
+    return 0;
+    
 }
 
 int ue4_testmessage_handler(const char *path, const char *types, lo_arg ** argv,

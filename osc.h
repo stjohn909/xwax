@@ -64,6 +64,9 @@ int position_handler(const char *path, const char *types, lo_arg ** argv,
 int ue4_testmessage_handler(const char *path, const char *types, lo_arg ** argv,
                 int argc, void *data, void *user_data);
 
+int playback_handler(const char *path, const char *types, lo_arg ** argv,
+                int argc, void *data, void *user_data);
+
 int osc_start(struct deck *deck, struct library *library, size_t ndeck);
 void osc_stop();
 
