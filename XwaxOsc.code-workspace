@@ -1,7 +1,14 @@
 {
-    "folders": [
-        {
-            "path": "."
-        }
-    ]
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "/home/pi/python3"
+		},
+		{
+			"path": "/home/pi/python3/pyliblo-0.10.0"
+		}
+	],
+	"settings": {}
 }

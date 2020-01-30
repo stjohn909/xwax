@@ -71,7 +71,7 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
     osc_library = library;
     osc_ndeck = ndeck;
 
-    address[0] = lo_address_new_from_url("osc.udp://10.0.1.51:9999/"); //ue4 osc server
+    address[0] = lo_address_new_from_url("osc.udp://10.0.1.51:9999/"); //ue4 osc addr to send to
 
     /* start a new server on port 7770 */
     st = lo_server_thread_new("8887", error);
@@ -170,23 +170,6 @@ int playback_handler(const char *path, const char *types, lo_arg ** argv,
     
 }
 
-int ue4_testmessage_handler(const char *path, const char *types, lo_arg ** argv,
-                    int argc, void *data, void *user_data)
-{
-    
-    //int i;
-    printf("Test Message called...\n");
-    
-    lo_address a = lo_message_get_source(data);
-    char* url = lo_address_get_url(a);
-
-    printf("%s\n", argv[0]);
-    
-    osc_send_ue4_testmessage_echo(address[0]);
-    return 0;
-
-}
-
 int osc_send_ue4_testmessage_echo(lo_address a)
 {
     printf("Send message called... \n");
@@ -194,6 +177,22 @@ int osc_send_ue4_testmessage_echo(lo_address a)
     lo_send(a, "/ue4_client/ue4_testmessage", "s", "This is a Test message from Xwax!"); 
 
     return 0;
+}
+int ue4_testmessage_handler(const char *path, const char *types, lo_arg ** argv,
+                    int argc, void *data, void *user_data)
+{
+    
+    //int i;
+    fprintf(stderr, "Test Message called...\n");
+    
+    lo_address a = address[0];
+    char* url = lo_address_get_url(a);
+
+    fprintf("%s\n", argv[0]);
+    
+    osc_send_ue4_testmessage_echo(a);
+    return 0;
+
 }
 
 int osc_send_record(lo_address a, int r)

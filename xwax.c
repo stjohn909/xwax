@@ -136,7 +136,8 @@ static void usage(FILE *fd)
 #ifdef WITH_OSC
     fprintf(fd, "OSC support:\n"
       "  --osc           Switch on open sound control\n"
-      "  --headless      Run in headless mode with out a graphical interface\n\n");
+      "  --headless      Run in headless mode with out a graphical interface\n"
+      "  --server <ipaddr>   OSC Server to send to\n\n"); //implement this later
 #endif
 
     fprintf(fd,
