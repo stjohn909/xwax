@@ -71,7 +71,7 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
     osc_library = library;
     osc_ndeck = ndeck;
 
-    address[0] = lo_address_new_from_url("osc.udp://10.0.1.51:9999/"); //ue4 osc addr to send to
+    address[0] = lo_address_new_from_url("osc.udp://10.0.1.52:9999/"); //ue4 osc addr to send to
 
     /* start a new server on port 7770 */
     st = lo_server_thread_new("8887", error);
