@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -v
 #
 # Audio import handler for xwax
 #
@@ -22,9 +22,18 @@ case "$FILE" in
 
 *.mp3)
 	echo "Calling MP3 decoder..." >&2
-	exec mpg123 -q -s --rate "$RATE" --stereo "$FILE"
+	exec ffmpeg -loglevel verbose -hwaccel hw:0 -i "$FILE" -ar "$RATE"  -f s16le -c:a pcm_s16le -
 	;;
 
+*.wav)
+	echo "Calling wav decoder..." >&2
+	exec ffmpeg -loglevel verbose -hwaccel hw:0 -i "$FILE" -ar "$RATE" -f s16le -c:a pcm_s16le -
+	;;
+	
+*.ogg)
+	echo "Calling ogg decoder..." >&2
+	ffmpeg -loglevel verbose -hwaccel hw:0 -acodec vorbis -i "$FILE" -ar "$RATE" -f s16le  -c:a pcm_s16le -
+	;;
 *)
 	echo "Calling fallback decoder..." >&2
 
@@ -35,7 +44,7 @@ case "$FILE" in
 		exit 1
 	fi
 
-	exec "$FFMPEG" -v 0 -i "$FILE" -f s16le -ar "$RATE" -
+	exec "${FFMPEG}" -loglevel verbose -acodec vorbis -i "$FILE" -ar "$RATE" -f s16le -c:a pcm_s16le -
 	;;
 
 esac

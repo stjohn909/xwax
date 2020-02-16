@@ -6,8 +6,8 @@ from time import sleep
 
 deck = 0
 xwaxhost = 'localhost'
-xwaxport = 7770
-rcvport = 7771
+xwaxport = 8887	
+rcvport = 9999
 
 
 def print_status(*args):
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     if args.action == 'load':
         osc_address = '/xwax/load_track'
         # FIXME get title and artist from file
-        osc_args = [args.player-1, args.filename, 'Afu-Ra', 'Defeat (Redio)']
+        osc_args = [args.player-1, args.filename]
     elif args.action == 'status':
         osc_address = '/xwax/get_status'
         osc_args = [args.player-1]

@@ -164,7 +164,7 @@ int playback_handler(const char *path, const char *types, lo_arg ** argv,
     de = &osc_deck[d];
     pl = &de->player;
 
-    player_set_internal_playback(pl);
+    player_set_timecode_playback(pl);
 
     return 0;
     
@@ -174,7 +174,7 @@ int osc_send_ue4_testmessage_echo(lo_address a)
 {
     printf("Send message called... \n");
 
-    lo_send(a, "/ue4_client/ue4_testmessage", "s", "This is a Test message from Xwax!"); 
+    lo_send(a, "/xwax/ue4_testmessage", "s", "This is a Test message from Xwax!"); 
 
     return 0;
 }
@@ -206,7 +206,7 @@ int osc_send_record(lo_address a, int r)
     }
     rx = osc_library->storage.by_artist.record[r];
 
-    lo_send(a, "/ue4_client/get_record", "isssd", r, rx->pathname, rx->artist, rx->title, rx->bpm);
+    lo_send(a, "/xwax/get_record", "isssd", r, rx->pathname, rx->artist, rx->title, rx->bpm);
     return 0;
 }
 
@@ -260,6 +260,7 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
 
     int d, i;
     struct deck *de;
+    struct player *pl;
     struct record *r;
 	struct listing storage;
 	bool success = false;
@@ -273,8 +274,7 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
     }
     de = &osc_deck[d];
 
-    //turns out you don't need the bpm double float to load tracks.  But there will be conversion between 
-    //xwax track struct and ue4 track struct: ue4 doesn't natively support doubles in blueprints.
+
 
 	storage = osc_library->storage;
 	for (i=0; i<storage.by_artist.entries; i++) {
@@ -290,6 +290,7 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
 	}
 	if (success) {
 		deck_load(&osc_deck[d], r);
+        fprintf(stderr, "Loaded the track.");
 	} else {
 		fprintf(stderr, "Error loading path %s", pathname);
 	}
@@ -384,24 +385,21 @@ int osc_send_status(lo_address a, int d)
     else
         path = "";
 
-    printf("PORT: %s\n", lo_address_get_port(a));
+    //printf("PORT: %s\n", lo_address_get_port(a));
 
     if(tr) {
         /* send a message to /xwax/status */
-        if (lo_send(a, "/xwax/status", "isssfffi",
+        if (lo_send(a, "/xwax/status", "iffff",
                 de->ncontrol,           // deck number (int)
-                path,               // track path (string)
-                de->record->artist,     // artist name (string)
-                de->record->title,      // track title (string)
                 (float) tr->length / (float) tr->rate,  // track length in seconds (float)
-                player_get_elapsed(pl),           // player position in seconds (float)
-                pl->pitch,              // player pitch (float)
-                pl->timecode_control)    // timecode activated or not (int)
+                (float) player_get_elapsed(pl),           // player position in seconds (float)
+                (float) pl->pitch,              // player pitch (float)
+                (float) player_get_position(pl))    // position in samples
             == -1) {
             printf("OSC error %d: %s\n", lo_address_errno(a),
                    lo_address_errstr(a));
         }
-        printf("osc_send_status: sent deck %i status to %s\n", d, lo_address_get_url(a));
+        //printf("osc_send_status: sent deck %i status to %s\n", d, lo_address_get_url(a));
     }
 
     return 0;
@@ -439,7 +437,7 @@ int osc_send_monitor(lo_address a, int d)
     printf("PORT: %s\n", lo_address_get_port(a));
 
     if(tr) {
-        /* send a message to /xwax/monitor */
+        /* send a message to /ue4_client/monitor */
         if (lo_send(a, "/xwax/monitor", "is", d, mon) == -1) {
             printf("OSC error %d: %s\n", lo_address_errno(a),
                    lo_address_errstr(a));
