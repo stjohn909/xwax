@@ -611,6 +611,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef WITH_OSC
+
         } else if (!strcmp(argv[0], "--osc")) {
             use_osc = true;
 
