@@ -386,9 +386,6 @@ int osc_send_status(lo_address a, int d)
     else
         path = "";
 
-
-    printf("Elapsed: %d\n", revs);
-
     if(tr) {
             if(tc) {
         
