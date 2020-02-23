@@ -33,7 +33,7 @@
 #include "status.h"
 #include "track.h"
 
-#define RATE 44100
+#define RATE 48000
 
 #define SAMPLE (sizeof(signed short) * TRACK_CHANNELS) /* bytes per sample */
 #define TRACK_BLOCK_PCM_BYTES (TRACK_BLOCK_SAMPLES * SAMPLE)

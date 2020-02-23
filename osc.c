@@ -96,7 +96,7 @@ int osc_start(struct deck *deck, struct library *library, size_t ndeck)
 
     lo_server_thread_add_method(st, "/xwax/pitch", "if", pitch_handler, NULL);
 
-    lo_server_thread_add_method(st, "/xwax/position", "if", position_handler, NULL);
+    lo_server_thread_add_method(st, "/xwax/get_position", "i", position_handler, NULL);
 
     lo_server_thread_add_method(st, "/xwax/playback", "i", playback_handler, NULL);
     
@@ -164,7 +164,7 @@ int playback_handler(const char *path, const char *types, lo_arg ** argv,
     de = &osc_deck[d];
     pl = &de->player;
 
-    player_set_internal_playback(pl);
+    player_set_timecode_playback(pl);
 
     return 0;
     
@@ -174,7 +174,7 @@ int osc_send_ue4_testmessage_echo(lo_address a)
 {
     printf("Send message called... \n");
 
-    lo_send(a, "/ue4_client/ue4_testmessage", "s", "This is a Test message from Xwax!"); 
+    lo_send(a, "/xwax/ue4_testmessage", "s", "This is a Test message from Xwax!"); 
 
     return 0;
 }
@@ -206,7 +206,7 @@ int osc_send_record(lo_address a, int r)
     }
     rx = osc_library->storage.by_artist.record[r];
 
-    lo_send(a, "/ue4_client/get_record", "isssd", r, rx->pathname, rx->artist, rx->title, rx->bpm);
+    lo_send(a, "/xwax/get_record", "isssd", r, rx->pathname, rx->artist, rx->title, rx->bpm);
     return 0;
 }
 
@@ -260,6 +260,7 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
 
     int d, i;
     struct deck *de;
+    struct player *pl;
     struct record *r;
 	struct listing storage;
 	bool success = false;
@@ -273,8 +274,7 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
     }
     de = &osc_deck[d];
 
-    //turns out you don't need the bpm double float to load tracks.  But there will be conversion between 
-    //xwax track struct and ue4 track struct: ue4 doesn't natively support doubles in blueprints.
+
 
 	storage = osc_library->storage;
 	for (i=0; i<storage.by_artist.entries; i++) {
@@ -290,6 +290,7 @@ int load_track_handler(const char *path, const char *types, lo_arg ** argv,
 	}
 	if (success) {
 		deck_load(&osc_deck[d], r);
+        fprintf(stderr, "Loaded the track.");
 	} else {
 		fprintf(stderr, "Error loading path %s", pathname);
 	}
@@ -305,8 +306,8 @@ int get_status_handler(const char *path, const char *types, lo_arg ** argv,
                 int argc, void *data, void *user_data)
 {
     /* example showing pulling the argument values out of the argv array */
-    printf("%s <- deck:%i\n", path, argv[0]->i);
-    fflush(stdout);
+    //printf("%s <- deck:%i\n", path, argv[0]->i);
+    //fflush(stdout);
 
     int d = argv[0]->i;
 
@@ -318,11 +319,11 @@ int get_status_handler(const char *path, const char *types, lo_arg ** argv,
     // lo_address a = lo_message_get_source(data);
     // lo_address a = lo_address_new("0.0.0.0", "7771");
     lo_address a = address[0];
-    printf("PORT: %s\n", lo_address_get_port(a));
+    //printf("PORT: %s\n", lo_address_get_port(a));
 
     char* url = lo_address_get_url(a);
 
-    printf("URL: %s\n", url);
+    //printf("URL: %s\n", url);
 
     osc_send_status(a, d);
 
@@ -350,8 +351,8 @@ int get_monitor_handler(const char *path, const char *types, lo_arg ** argv,
     }
 
     // lo_address a = lo_message_get_source(data);
-     lo_address a = lo_address_new("0.0.0.0", "8888");
-    //lo_address a = address[0];
+     //lo_address a = lo_address_new("0.0.0.0", "8888");
+    lo_address a = address[0];
     printf("PORT: %s\n", lo_address_get_port(a));
 
     char* url = lo_address_get_url(a);
@@ -378,30 +379,33 @@ int osc_send_status(lo_address a, int d)
     tr = pl->track;
     tc = pl->timecoder;
 
+    float revs;
     char *path;
     if(tr->path)
         path = tr->path;
     else
         path = "";
 
-    printf("PORT: %s\n", lo_address_get_port(a));
+
+    printf("Elapsed: %d\n", revs);
 
     if(tr) {
+            if(tc) {
+        
+        revs = (float) player_get_position(pl);
+    }
         /* send a message to /xwax/status */
-        if (lo_send(a, "/xwax/status", "isssfffi",
+        if (lo_send(a, "/xwax/status", "iffff",
                 de->ncontrol,           // deck number (int)
-                path,               // track path (string)
-                de->record->artist,     // artist name (string)
-                de->record->title,      // track title (string)
                 (float) tr->length / (float) tr->rate,  // track length in seconds (float)
-                player_get_elapsed(pl),           // player position in seconds (float)
-                pl->pitch,              // player pitch (float)
-                pl->timecode_control)    // timecode activated or not (int)
+                (float) player_get_elapsed(pl),           // player position in seconds (float)
+                (float) pl->pitch,              // player pitch (float)
+                0.25  )   // Timecoder rps
             == -1) {
             printf("OSC error %d: %s\n", lo_address_errno(a),
                    lo_address_errstr(a));
         }
-        printf("osc_send_status: sent deck %i status to %s\n", d, lo_address_get_url(a));
+        //printf("osc_send_status: sent deck %i status to %s\n", d, lo_address_get_url(a));
     }
 
     return 0;
@@ -410,8 +414,7 @@ int osc_send_status(lo_address a, int d)
 /*
  * sent monitor message for deck d to /xwax/monitor
  */
-
-int osc_send_monitor(lo_address a, int d)
+ int osc_send_monitor(lo_address a, int d)
 {
     struct deck *de;
     struct player *pl;
@@ -451,6 +454,36 @@ int osc_send_monitor(lo_address a, int d)
 
     return 0;
 }
+
+
+
+int osc_send_position(lo_address a, int d)
+{
+    struct deck *de;
+    struct player *pl;
+    struct track *tr;
+
+    de = &osc_deck[d];
+    pl = &de->player;
+    tr = pl->track;
+    float elapsed = 0.0;
+    //printf("PORT: %s\n", lo_address_get_port(a));
+
+    if(tr) {
+        elapsed = (float) player_get_elapsed(pl);
+        /* send a message to /ue4_client/monitor */
+        if (lo_send(a, "/xwax/position", "if", d, elapsed) == -1) {
+            printf("OSC error %d: %s\n", lo_address_errno(a),
+                   lo_address_errstr(a));
+        }
+        printf("osc_send_position: %f\n", elapsed);
+    }
+
+    return 0;
+}
+
+
+
 
 
 
@@ -555,11 +588,11 @@ int position_handler(const char *path, const char *types, lo_arg ** argv,
     //fflush(stdout);
     
     struct deck *de;
-    struct player *pl;
-    de = &osc_deck[argv[0]->i];
-    pl = &de->player;
+    int decknum = argv[0]->i;
+    de = &osc_deck[decknum];
     
-    player_seek_to(pl, argv[1]->f);
+    osc_send_position(address[0], decknum);
+    //player_seek_to(pl, argv[1]->f);
     
     return 0;
 }
